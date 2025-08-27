@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Student Doubt Bot</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+  #chat { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; }
+  #inputBox { width: 80%; padding: 10px; }
+  #sendBtn { padding: 10px; }
+  .user { color: blue; }
+  .bot { color: green; }
+  .message { margin: 5px 0; }
+</style>
+</head>
+<body>
+  <h2>Student Doubt Bot</h2>
+  <div id="chat"></div>
+  <input type="text" id="inputBox" placeholder="Ask your question..." />
+  <button id="sendBtn">Send</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const inputBox = document.getElementById("inputBox");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function appendMessage(text, cls) {
+      const div = document.createElement("div");
+      div.className = "message " + cls;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    sendBtn.onclick = async () => {
+      const question = inputBox.value.trim();
+      if (!question) return;
+      appendMessage("You: " + question, "user");
+      inputBox.value = "";
+
+      const response = await fetch("http://localhost:8000/ask/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ question }),
+      });
+      if (!response.ok) {
+        appendMessage("Error contacting bot.", "bot");
+        return;
+      }
+      const data = await response.json();
+      appendMessage("Bot: " + data.answer, "bot");
+    };
+  </script>
+</body>
+</html>
